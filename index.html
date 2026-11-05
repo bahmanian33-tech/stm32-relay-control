@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>کنترل فن — ربات بله</title>
+<title>کنترل فن</title>
 <style>
   :root {
     --bg:#0b1410; --card:#15241c; --on:#2e7d32; --off:#c62828;
@@ -27,24 +27,18 @@
   .b-off{background:linear-gradient(180deg,#e53935,var(--off))}
   .b-dim{background:#243d30;border:1px solid var(--line);color:var(--text);font-weight:600}
   .b-accent{background:linear-gradient(180deg,#ffa726,var(--accent));color:#221100}
-  details{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:16px}
-  summary{cursor:pointer;font-weight:700;color:var(--muted)}
-  label{display:block;font-size:.8rem;color:var(--muted);margin:12px 0 4px}
-  input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0c1a13;color:var(--text);font-family:inherit}
-  .log{margin-top:14px;font-size:.8rem;color:#9e9e9e;background:#0a120e;border-radius:12px;padding:10px 12px;min-height:44px;word-break:break-all;direction:ltr;text-align:left;font-family:ui-monospace,monospace}
-  .hint{font-size:.78rem;color:var(--muted);line-height:1.65;margin-top:10px}
+  .log{margin-top:14px;font-size:.8rem;color:#9e9e9e;background:#0a120e;border-radius:12px;padding:10px 12px;min-height:40px;direction:ltr;text-align:left;font-family:monospace}
+  .hint{font-size:.78rem;color:var(--muted);line-height:1.6;margin-top:12px;text-align:center}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>کنترل فن PWM</h1>
-  <p class="sub">ربات بله · اینترنت همراه هم کار می‌کند</p>
-
+  <p class="sub">اینترنت همراه · متصل به سیستم ربات</p>
   <div class="status-card">
     <div class="pwm" id="pwmLabel">PWM = ؟</div>
     <div class="bar"><i id="barFill"></i></div>
   </div>
-
   <div class="row">
     <button class="b-on" data-cmd="on">روشن</button>
     <button class="b-off" data-cmd="off">خاموش</button>
@@ -63,72 +57,21 @@
     <button class="b-accent" data-cmd="status">وضعیت</button>
     <button class="b-dim" data-cmd="cancel">لغو تایمر</button>
   </div>
-
-  <details open>
-    <summary>تنظیمات</summary>
-    <label>توکن ربات بله</label>
-    <input id="token" />
-    <p class="hint">
-      ۱) برنامه جاوا روی کامپیوتر روشن باشد<br/>
-      ۲) دکمه را در این صفحه بزنید<br/>
-      ۳) ظرف ۲ ثانیه فن باید عمل کند<br/>
-      گوشی می‌تواند روی اینترنت همراه باشد.
-    </p>
-    <button class="b-accent" id="btnSave" style="width:100%;margin-top:10px">ذخیره</button>
-  </details>
-
   <div class="log" id="log">آماده</div>
+  <p class="hint">برنامه جاوا روی کامپیوتر باید روشن باشد. ربات داخل بله هم جدا کار می‌کند.</p>
 </div>
 <script>
 (function(){
-  const $ = id => document.getElementById(id);
+  const TOPIC = "bahmanian-fan-bale-7k2p9x";
+  const TOKEN = "666814160:UBhgGpogVgFUJvLqXMWwNlgCbNNglRznSyg";
   let pwm = 0;
-  $("token").value = localStorage.getItem("fan_token") || "666814160:UBhgGpogVgFUJvLqXMWwNlgCbNNglRznSyg";
-  $("btnSave").onclick = () => {
-    localStorage.setItem("fan_token", $("token").value.trim());
-    log("ذخیره شد");
-  };
+  const $ = id => document.getElementById(id);
   function setPwm(v){
     pwm = Math.max(0, Math.min(255, v|0));
     $("pwmLabel").textContent = "PWM = " + pwm;
     $("barFill").style.width = (pwm/255*100).toFixed(1) + "%";
   }
   function log(m){ $("log").textContent = m; }
-
-  function fireUrl(url){
-    return new Promise(function(resolve){
-      try {
-        fetch(url, { mode: "no-cors", method: "GET", cache: "no-store" }).catch(function(){});
-      } catch(e) {}
-      var ifr = document.createElement("iframe");
-      ifr.style.cssText = "display:none;width:0;height:0;border:0";
-      var done = false;
-      function finish(){
-        if(done) return;
-        done = true;
-        try { ifr.remove(); } catch(e) {}
-        resolve();
-      }
-      ifr.onload = finish;
-      ifr.onerror = finish;
-      setTimeout(finish, 1200);
-      ifr.src = url;
-      document.body.appendChild(ifr);
-    });
-  }
-
-  async function sendCmd(cmd){
-    var token = $("token").value.trim();
-    if(!token) throw new Error("توکن خالی است");
-    var payload = "FAN|" + cmd + "|" + Date.now();
-    var base = "https://tapi.bale.ai/bot" + token + "/";
-    var u1 = base + "setMyShortDescription?short_description=" + encodeURIComponent(payload);
-    await fireUrl(u1);
-    var u2 = base + "setMyDescription?description=" + encodeURIComponent(payload);
-    await fireUrl(u2);
-    return "فرمان «" + cmd + "» به ربات ارسال شد";
-  }
-
   function guess(cmd){
     if(cmd==="on") setPwm(180);
     else if(cmd==="off") setPwm(0);
@@ -136,20 +79,57 @@
     else if(cmd==="-") setPwm(pwm-20);
     else if(/^\d+$/.test(cmd)) setPwm(+cmd);
   }
-
+  function toBaleCmd(cmd){
+    if(cmd==="on") return "c_on";
+    if(cmd==="off") return "c_off";
+    if(cmd==="+") return "c_up";
+    if(cmd==="-") return "c_dn";
+    if(cmd==="status") return "c_st";
+    if(cmd==="cancel") return "c_ca";
+    if(/^\d+$/.test(cmd)) return "c_" + cmd;
+    return "c_on";
+  }
+  function fireUrl(url){
+    return new Promise(function(resolve){
+      try { fetch(url, {mode:"no-cors", cache:"no-store"}).catch(function(){}); } catch(e) {}
+      var ifr = document.createElement("iframe");
+      ifr.style.cssText = "display:none;width:0;height:0;border:0";
+      var done=false;
+      function finish(){ if(done)return; done=true; try{ifr.remove();}catch(e){} resolve(); }
+      ifr.onload=finish; ifr.onerror=finish; setTimeout(finish, 1000);
+      ifr.src=url; document.body.appendChild(ifr);
+    });
+  }
+  async function sendCmd(cmd){
+    var ok = false;
+    try {
+      var res = await fetch("https://ntfy.sh/" + TOPIC, {
+        method: "POST", body: cmd, headers: {"Content-Type":"text/plain"}
+      });
+      if(res.ok) ok = true;
+    } catch(e) {}
+    try {
+      var c = toBaleCmd(cmd);
+      var commands = JSON.stringify([{command:c, description:"web"}]);
+      var url = "https://tapi.bale.ai/bot" + TOKEN + "/setMyCommands?commands=" + encodeURIComponent(commands);
+      await fireUrl(url);
+      ok = true;
+    } catch(e) {}
+    if(!ok) throw new Error("ارسال ناموفق");
+    return "ارسال شد: " + cmd;
+  }
   document.querySelectorAll("button[data-cmd]").forEach(function(btn){
     btn.addEventListener("click", async function(){
       var cmd = btn.getAttribute("data-cmd");
-      document.querySelectorAll("button[data-cmd]").forEach(function(b){ b.disabled = true; });
+      document.querySelectorAll("button[data-cmd]").forEach(function(b){b.disabled=true;});
       log("ارسال " + cmd + " ...");
       try {
-        var r = await sendCmd(cmd);
-        log(r + " — منتظر اجرای کامپیوتر (حدود ۲ ثانیه)");
+        log(await sendCmd(cmd));
         guess(cmd);
       } catch(e) {
-        log("خطا: " + (e.message || e));
+        log("خطا: " + (e.message||e));
       } finally {
-        document.querySelectorAll("button[data-cmd]").forEach(function(b){ b.disabled = false; });
+        document.querySelectorAll("button[data-cmd]").forEach(function(b){b.disabled=false;});
       }
     });
   });
