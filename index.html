@@ -1,413 +1,347 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>کنترل ۸ رله • رنگین‌کمان دایره</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(160deg, #070b14, #12182b, #0a0e1a);
-      color: #e8eaf6;
-      min-height: 100vh;
-      padding: 16px 14px 50px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-x: hidden;
-    }
-    h1 {
-      font-size: 1.7rem;
-      margin: 8px 0 4px;
-      background: linear-gradient(90deg, #ff1744, #ff9100, #ffea00, #00e676, #00b0ff, #651fff, #d500f9);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .subtitle { color: #78909c; font-size: 0.85rem; margin-bottom: 16px; }
-    .card {
-      background: rgba(255,255,255,0.045);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 22px;
-      padding: 16px;
-      width: 100%;
-      max-width: 440px;
-      margin-bottom: 14px;
-      backdrop-filter: blur(12px);
-    }
-    .status {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      font-size: 0.95rem;
-    }
-    .dot {
-      width: 11px; height: 11px; border-radius: 50%;
-      display: inline-block; margin-left: 7px;
-    }
-    .dot.on  { background: #00e676; box-shadow: 0 0 12px #00e676; }
-    .dot.off { background: #ef5350; }
-    button {
-      border: none; border-radius: 16px;
-      font-size: 1rem; font-weight: 600;
-      cursor: pointer; transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
-      -webkit-tap-highlight-color: transparent;
-    }
-    button:active { transform: scale(0.96); }
-    button:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
-    .btn-main { width: 100%; padding: 13px; margin-bottom: 9px; }
-    .btn-connect {
-      background: linear-gradient(90deg, #2979ff, #7c4dff);
-      color: #fff;
-      box-shadow: 0 4px 18px rgba(41,121,255,0.3);
-    }
-    .btn-disconnect { background: #37474f; color: #cfd8dc; }
-    .btn-auto {
-      background: linear-gradient(90deg, #ff6d00, #ff9100);
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(255,109,0,0.35);
-    }
-    .btn-auto.running {
-      background: linear-gradient(90deg, #d50000, #ff1744);
-      animation: pulse-red 1.2s infinite;
-    }
-    @keyframes pulse-red {
-      0%,100% { box-shadow: 0 0 0 0 rgba(255,23,68,0.5); }
-      50% { box-shadow: 0 0 0 10px rgba(255,23,68,0); }
-    }
-    .rainbow-container {
-      position: relative;
-      width: 260px;
-      height: 260px;
-      margin: 8px auto;
-    }
-    .ring {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      border-style: solid;
-      opacity: 0;
-      transition: all 0.55s cubic-bezier(0.34,1.4,0.64,1);
-      pointer-events: none;
-    }
-    .ring.active {
-      opacity: 1;
-      box-shadow: 0 0 18px var(--glow), inset 0 0 12px var(--glow);
-    }
-    #ring8 { width: 260px; height: 260px; border-width: 12px; border-color: #f5f5f5; --glow: #ffffff; }
-    #ring7 { width: 232px; height: 232px; border-width: 12px; border-color: #d500f9; --glow: #d500f9; }
-    #ring6 { width: 204px; height: 204px; border-width: 12px; border-color: #651fff; --glow: #651fff; }
-    #ring5 { width: 176px; height: 176px; border-width: 12px; border-color: #00b0ff; --glow: #00b0ff; }
-    #ring4 { width: 148px; height: 148px; border-width: 12px; border-color: #00e676; --glow: #00e676; }
-    #ring3 { width: 120px; height: 120px; border-width: 12px; border-color: #ffea00; --glow: #ffea00; }
-    #ring2 { width: 92px;  height: 92px;  border-width: 12px; border-color: #ff6d00; --glow: #ff6d00; }
-    #ring1 { width: 64px;  height: 64px;  border-width: 12px; border-color: #ff1744; --glow: #ff1744; }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 11px;
-    }
-    .relay-btn {
-      padding: 18px 10px;
-      border-radius: 16px;
-      font-size: 1.05rem;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.05);
-      color: #b0bec5;
-    }
-    .relay-btn .num {
-      font-size: 0.68rem;
-      opacity: 0.7;
-      display: block;
-      margin-bottom: 3px;
-    }
-    .relay-btn .label { position: relative; z-index: 2; }
-    .relay-btn.on { border-color: transparent; }
-    #r1.on { background: linear-gradient(145deg, #ff1744, #ff5252); box-shadow: 0 5px 18px rgba(255,23,68,0.45); color: #fff; }
-    #r2.on { background: linear-gradient(145deg, #ff6d00, #ff9100); box-shadow: 0 5px 18px rgba(255,109,0,0.45); color: #fff; }
-    #r3.on { background: linear-gradient(145deg, #ffea00, #ffd600); box-shadow: 0 5px 18px rgba(255,234,0,0.45); color: #333; }
-    #r4.on { background: linear-gradient(145deg, #00e676, #69f0ae); box-shadow: 0 5px 18px rgba(0,230,118,0.45); color: #003d1f; }
-    #r5.on { background: linear-gradient(145deg, #00b0ff, #40c4ff); box-shadow: 0 5px 18px rgba(0,176,255,0.45); color: #fff; }
-    #r6.on { background: linear-gradient(145deg, #651fff, #7c4dff); box-shadow: 0 5px 18px rgba(101,31,255,0.45); color: #fff; }
-    #r7.on { background: linear-gradient(145deg, #d500f9, #e040fb); box-shadow: 0 5px 18px rgba(213,0,249,0.45); color: #fff; }
-    #r8.on { background: linear-gradient(145deg, #eceff1, #ffffff); box-shadow: 0 5px 18px rgba(255,255,255,0.35); color: #333; }
-    .relay-btn.dance {
-      animation: dance-pop 0.5s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    @keyframes dance-pop {
-      0%   { transform: scale(1); }
-      40%  { transform: scale(1.12); }
-      100% { transform: scale(1); }
-    }
-    .log {
-      background: #060a12;
-      border-radius: 14px;
-      padding: 11px;
-      font-family: "SF Mono", Consolas, monospace;
-      font-size: 0.78rem;
-      height: 85px;
-      overflow-y: auto;
-      color: #69f0ae;
-      white-space: pre-wrap;
-      border: 1px solid rgba(105,240,174,0.1);
-    }
-    .toast {
-      position: fixed; bottom: 26px; left: 50%;
-      transform: translateX(-50%);
-      background: rgba(26,35,126,0.95);
-      color: #fff;
-      padding: 11px 22px; border-radius: 40px;
-      font-size: 0.88rem; opacity: 0;
-      transition: opacity 0.3s; pointer-events: none;
-      z-index: 100;
-      backdrop-filter: blur(8px);
-    }
-    .toast.show { opacity: 1; }
-    .note {
-      margin-top: 10px; font-size: 0.76rem;
-      color: #607d8b; text-align: center;
-      max-width: 380px; line-height: 1.5;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>کنترل فن PWM</title>
+<style>
+  :root {
+    --bg: #0b1410;
+    --card: #15241c;
+    --on: #2e7d32;
+    --off: #c62828;
+    --accent: #ff8f00;
+    --text: #e8f5e9;
+    --muted: #81c784;
+    --line: #1e3a2f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Tahoma, "Segoe UI", sans-serif;
+    background: radial-gradient(ellipse at top, #143024 0%, var(--bg) 55%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px 16px 40px;
+  }
+  .wrap { max-width: 420px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    font-size: 1.45rem;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+  .sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+  }
+  .status-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .pwm {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .bar {
+    height: 12px;
+    background: #0a1a12;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 12px;
+    border: 1px solid var(--line);
+  }
+  .bar > i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #1b5e20, var(--accent));
+    transition: width 0.25s ease;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .row4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  button {
+    border: none;
+    border-radius: 14px;
+    padding: 16px 10px;
+    font-size: 1.05rem;
+    font-family: inherit;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.08s ease, filter 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.5; cursor: wait; }
+  .b-on { background: linear-gradient(180deg, #43a047, var(--on)); }
+  .b-off { background: linear-gradient(180deg, #e53935, var(--off)); }
+  .b-dim { background: #243d30; border: 1px solid var(--line); color: var(--text); font-weight: 600; }
+  .b-accent { background: linear-gradient(180deg, #ffa726, var(--accent)); color: #221100; }
+  details.settings {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 12px 14px;
+    margin-top: 18px;
+  }
+  details.settings summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 12px 0 4px;
+  }
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: #0c1a13;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+  }
+  .log {
+    margin-top: 14px;
+    font-size: 0.8rem;
+    color: #9e9e9e;
+    background: #0a120e;
+    border-radius: 12px;
+    padding: 10px 12px;
+    min-height: 44px;
+    word-break: break-all;
+    direction: ltr;
+    text-align: left;
+    font-family: ui-monospace, monospace;
+  }
+  .hint {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-top: 10px;
+  }
+  .mode {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .mode button {
+    flex: 1;
+    padding: 10px;
+    font-size: 0.9rem;
+    background: #1a2e24;
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .mode button.active {
+    border-color: var(--accent);
+    color: #fff;
+    background: #243d30;
+  }
+</style>
 </head>
 <body>
-  <h1>کنترل ۸ رله</h1>
-  <div class="subtitle">رنگین‌کمان دایره کامل • USB-Serial</div>
+  <div class="wrap">
+    <h1>کنترل فن PWM</h1>
+    <p class="sub">همان دکمه‌های ربات بله</p>
 
-  <div class="card">
-    <div class="status">
-      <span>وضعیت اتصال</span>
-      <span>
-        <span class="dot off" id="statusDot"></span>
-        <span id="statusText">قطع</span>
-      </span>
+    <div class="status-card">
+      <div class="pwm" id="pwmLabel">PWM = 0</div>
+      <div class="bar"><i id="barFill"></i></div>
     </div>
-    <button class="btn-main btn-connect" id="btnConnect" onclick="connect()">اتصال به پورت سریال</button>
-    <button class="btn-main btn-disconnect" id="btnDisconnect" onclick="disconnect()" disabled>قطع اتصال</button>
-    <button class="btn-main btn-auto" id="btnAuto" onclick="toggleAuto()" disabled>▶ حالت اتوماتیک</button>
-  </div>
 
-  <div class="card" style="padding-bottom:10px;">
-    <div style="font-size:0.85rem; color:#90a4ae; margin-bottom:6px; text-align:center;">رنگین‌کمان</div>
-    <div class="rainbow-container">
-      <div class="ring" id="ring8"></div>
-      <div class="ring" id="ring7"></div>
-      <div class="ring" id="ring6"></div>
-      <div class="ring" id="ring5"></div>
-      <div class="ring" id="ring4"></div>
-      <div class="ring" id="ring3"></div>
-      <div class="ring" id="ring2"></div>
-      <div class="ring" id="ring1"></div>
+    <div class="mode">
+      <button type="button" id="modeHttp" class="active">کامپیوتر (HTTP)</button>
+      <button type="button" id="modeBale">ربات بله</button>
     </div>
+
+    <div class="row">
+      <button type="button" class="b-on" data-cmd="on">روشن</button>
+      <button type="button" class="b-off" data-cmd="off">خاموش</button>
+    </div>
+    <div class="row">
+      <button type="button" class="b-dim" data-cmd="+">+20</button>
+      <button type="button" class="b-dim" data-cmd="-">−20</button>
+    </div>
+    <div class="row4">
+      <button type="button" class="b-dim" data-cmd="50">50</button>
+      <button type="button" class="b-dim" data-cmd="100">100</button>
+      <button type="button" class="b-dim" data-cmd="180">180</button>
+      <button type="button" class="b-dim" data-cmd="255">255</button>
+    </div>
+    <div class="row">
+      <button type="button" class="b-accent" data-cmd="status">وضعیت</button>
+      <button type="button" class="b-dim" data-cmd="cancel">لغو تایمر</button>
+    </div>
+
+    <details class="settings" open>
+      <summary>تنظیمات اتصال</summary>
+
+      <div id="httpSettings">
+        <label>آدرس کامپیوتر (برنامه جاوا)</label>
+        <input id="serverUrl" placeholder="http://192.168.1.10:8765" />
+        <p class="hint">
+          گوشی و کامپیوتر روی یک وای‌فای باشند.
+          برنامه جاوا باید روشن باشد و پیام <b>HTTP server on port 8765</b> را نشان دهد.
+        </p>
+      </div>
+
+      <div id="baleSettings" style="display:none">
+        <label>توکن ربات بله</label>
+        <input id="baleToken" placeholder="123456:ABC..." />
+        <label>Chat ID شما</label>
+        <input id="chatId" placeholder="مثلاً 6284838061" />
+        <p class="hint">
+          اگر آدرس HTTP کامپیوتر را هم پر کرده باشید، فرمان از همان مسیر اجرا می‌شود.
+          در غیر این صورت فقط پیام تأیید در بله می‌آید؛ برای کنترل از راه دور اینترنت همراه، از خود اپ بله استفاده کنید.
+        </p>
+      </div>
+
+      <button type="button" class="b-accent" id="btnSave" style="width:100%;margin-top:12px">ذخیره</button>
+    </details>
+
+    <div class="log" id="log">آماده</div>
   </div>
 
-  <div class="card">
-    <div class="grid" id="grid"></div>
-  </div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  let mode = localStorage.getItem("fan_mode") || "http";
+  let pwm = 0;
 
-  <div class="card">
-    <div style="font-size:0.85rem; margin-bottom:5px; color:#90a4ae;">لاگ</div>
-    <div class="log" id="log">آماده...</div>
-  </div>
+  $("serverUrl").value = localStorage.getItem("fan_server") || "http://192.168.1.10:8765";
+  $("baleToken").value = localStorage.getItem("fan_token") || "666814160:UBhgGpogVgFUJvLqXMWwNlgCbNNglRznSyg";
+  $("chatId").value = localStorage.getItem("fan_chat") || "";
 
-  <div class="note">
-    هر رله یک حلقه از رنگین‌کمان را روشن می‌کند.<br>
-    در حالت خاموش کاملاً نامرئی است.
-  </div>
+  function setMode(m) {
+    mode = m;
+    localStorage.setItem("fan_mode", m);
+    $("modeHttp").classList.toggle("active", m === "http");
+    $("modeBale").classList.toggle("active", m === "bale");
+    $("httpSettings").style.display = m === "http" ? "block" : "none";
+    $("baleSettings").style.display = m === "bale" ? "block" : "none";
+  }
+  setMode(mode);
+  $("modeHttp").onclick = () => setMode("http");
+  $("modeBale").onclick = () => setMode("bale");
 
-  <div class="toast" id="toast"></div>
+  $("btnSave").onclick = () => {
+    localStorage.setItem("fan_server", $("serverUrl").value.trim());
+    localStorage.setItem("fan_token", $("baleToken").value.trim());
+    localStorage.setItem("fan_chat", $("chatId").value.trim());
+    log("ذخیره شد");
+  };
 
-  <script>
-    let port = null, writer = null, reader = null, keepReading = false;
-    let states = Array(8).fill(false);
-    let autoRunning = false;
-    let autoAbort = false;
-    const colors = ['قرمز','نارنجی','زرد','سبز','آبی','نیلی','بنفش','سفید'];
-    const grid = document.getElementById('grid');
-    for (let i = 1; i <= 8; i++) {
-      const btn = document.createElement('button');
-      btn.className = 'relay-btn';
-      btn.id = 'r' + i;
-      btn.innerHTML = `<span class="num">رله ${i} • ${colors[i-1]}</span><span class="label" id="s${i}">خاموش</span>`;
-      btn.onclick = () => toggle(i);
-      btn.disabled = true;
-      grid.appendChild(btn);
-    }
-    if (!('serial' in navigator)) {
-      document.getElementById('btnConnect').disabled = true;
-      log('مرورگر از Web Serial پشتیبانی نمی‌کند');
-    }
-    function log(msg) {
-      const el = document.getElementById('log');
-      const time = new Date().toLocaleTimeString('fa-IR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-      el.textContent += `[${time}] ${msg}\n`;
-      el.scrollTop = el.scrollHeight;
-    }
-    function toast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 1800);
-    }
-    function updateUI(connected) {
-      document.getElementById('statusText').textContent = connected ? 'متصل' : 'قطع';
-      document.getElementById('statusDot').className = 'dot ' + (connected ? 'on' : 'off');
-      document.getElementById('btnConnect').disabled = connected;
-      document.getElementById('btnDisconnect').disabled = !connected;
-      document.getElementById('btnAuto').disabled = !connected;
-      for (let i = 1; i <= 8; i++) {
-        document.getElementById('r' + i).disabled = !connected || autoRunning;
-      }
-    }
-    function updateButton(i, withEffect = true) {
-      const btn = document.getElementById('r' + i);
-      const span = document.getElementById('s' + i);
-      const ring = document.getElementById('ring' + i);
-      if (states[i-1]) {
-        btn.classList.add('on');
-        span.textContent = 'روشن';
-        ring.classList.add('active');
-        if (withEffect) {
-          btn.classList.remove('dance');
-          void btn.offsetWidth;
-          btn.classList.add('dance');
-        }
-      } else {
-        btn.classList.remove('on');
-        span.textContent = 'خاموش';
-        ring.classList.remove('active');
-      }
-    }
-    async function connect() {
+  function setPwm(v) {
+    pwm = Math.max(0, Math.min(255, v | 0));
+    $("pwmLabel").textContent = "PWM = " + pwm;
+    $("barFill").style.width = (pwm / 255 * 100).toFixed(1) + "%";
+  }
+
+  function log(msg) {
+    $("log").textContent = msg;
+  }
+
+  function guessPwmFromCmd(cmd, body) {
+    const m = /PWM\s*=\s*(\d+)/i.exec(body || "");
+    if (m) return setPwm(+m[1]);
+    if (cmd === "on") setPwm(180);
+    else if (cmd === "off") setPwm(0);
+    else if (cmd === "+") setPwm(pwm + 20);
+    else if (cmd === "-") setPwm(pwm - 20);
+    else if (/^\d+$/.test(cmd)) setPwm(+cmd);
+  }
+
+  async function sendHttp(cmd) {
+    let base = $("serverUrl").value.trim().replace(/\/$/, "");
+    if (!base) throw new Error("آدرس کامپیوتر خالی است");
+    const url = base + "/cmd?c=" + encodeURIComponent(cmd);
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch(url, { signal: ctrl.signal, mode: "cors" });
+    clearTimeout(t);
+    const text = await res.text();
+    if (!res.ok) throw new Error(text || res.status);
+    return text;
+  }
+
+  async function sendBale(cmd) {
+    const token = $("baleToken").value.trim();
+    const chat = $("chatId").value.trim();
+    if (!token || !chat) throw new Error("توکن و Chat ID لازم است");
+
+    const map = {
+      on: "روشن",
+      off: "خاموش",
+      "+": "+20",
+      "-": "-20",
+      status: "وضعیت",
+      cancel: "لغو تایمر"
+    };
+    const text = map[cmd] || cmd;
+
+    const base = $("serverUrl").value.trim();
+    if (base) {
       try {
-        port = await navigator.serial.requestPort();
-        await port.open({ baudRate: 9600 });
-        writer = port.writable.getWriter();
-        keepReading = true;
-        readLoop();
-        updateUI(true);
-        document.getElementById('log').textContent = '';
-        log('اتصال برقرار شد');
-        toast('متصل شدید');
-      } catch (e) {
-        if (e.name !== 'NotFoundError') toast('خطا: ' + e.message);
-      }
+        return await sendHttp(cmd);
+      } catch (e) { /* continue */ }
     }
-    async function disconnect() {
-      autoAbort = true;
-      autoRunning = false;
-      document.getElementById('btnAuto').classList.remove('running');
-      document.getElementById('btnAuto').textContent = '▶ حالت اتوماتیک';
-      keepReading = false;
-      try {
-        if (reader) { await reader.cancel(); reader.releaseLock(); reader = null; }
-        if (writer) { writer.releaseLock(); writer = null; }
-        if (port) { await port.close(); port = null; }
-      } catch(e) {}
-      updateUI(false);
-      states.fill(false);
-      for (let i = 1; i <= 8; i++) updateButton(i, false);
-      toast('قطع شد');
+
+    const body = new URLSearchParams({
+      chat_id: chat,
+      text: "🌐 وب: " + text
+    });
+    const res = await fetch("https://tapi.bale.ai/bot" + token + "/sendMessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+      body
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(JSON.stringify(json));
+    return "پیام به بله: " + text;
+  }
+
+  async function run(cmd) {
+    const buttons = document.querySelectorAll("button[data-cmd]");
+    buttons.forEach((b) => (b.disabled = true));
+    log("ارسال " + cmd + " ...");
+    try {
+      const body = mode === "http" ? await sendHttp(cmd) : await sendBale(cmd);
+      log(String(body));
+      guessPwmFromCmd(cmd, String(body));
+    } catch (e) {
+      log("خطا: " + (e.message || e));
+    } finally {
+      buttons.forEach((b) => (b.disabled = false));
     }
-    async function readLoop() {
-      const decoder = new TextDecoder();
-      while (port && port.readable && keepReading) {
-        try {
-          reader = port.readable.getReader();
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            const txt = decoder.decode(value).trim();
-            if (txt) log(txt);
-          }
-        } catch(e) { break; }
-        finally { if (reader) { reader.releaseLock(); reader = null; } }
-      }
-    }
-    async function send(cmd) {
-      if (!writer) return;
-      await writer.write(new TextEncoder().encode(cmd));
-    }
-    async function toggle(i) {
-      if (!writer || autoRunning) return;
-      try {
-        await send(String(i));
-        states[i-1] = !states[i-1];
-        updateButton(i);
-        toast(`رله ${i} (${colors[i-1]}) ${states[i-1] ? 'روشن' : 'خاموش'}`);
-      } catch(e) {
-        toast('خطا در ارسال');
-      }
-    }
-    async function toggleAuto() {
-      if (autoRunning) {
-        autoAbort = true;
-        return;
-      }
-      autoRunning = true;
-      autoAbort = false;
-      const btn = document.getElementById('btnAuto');
-      btn.classList.add('running');
-      btn.textContent = '⏹ توقف اتوماتیک';
-      updateUI(true);
-      log('شروع حالت اتوماتیک...');
-      try { await runSequence(); } catch(e) {}
-      autoRunning = false;
-      btn.classList.remove('running');
-      btn.textContent = '▶ حالت اتوماتیک';
-      updateUI(true);
-      log('حالت اتوماتیک تمام شد');
-    }
-    async function sleep(ms) {
-      return new Promise(r => setTimeout(r, ms));
-    }
-    async function setRelay(i, on) {
-      if (autoAbort) throw 'aborted';
-      if (states[i-1] !== on) {
-        await send(String(i));
-        states[i-1] = on;
-        updateButton(i);
-      }
-    }
-    async function allOff() {
-      for (let i = 1; i <= 8; i++) {
-        await setRelay(i, false);
-        await sleep(30);
-      }
-    }
-    async function runSequence() {
-      for (let i = 1; i <= 8; i++) {
-        await setRelay(i, true);
-        await sleep(280);
-      }
-      await sleep(900);
-      for (let i = 8; i >= 1; i--) {
-        await setRelay(i, false);
-        await sleep(250);
-      }
-      await sleep(500);
-      for (let k = 0; k < 2; k++) {
-        for (let i = 1; i <= 8; i++) {
-          await setRelay(i, true);
-          await sleep(120);
-          await setRelay(i, false);
-        }
-        for (let i = 7; i >= 2; i--) {
-          await setRelay(i, true);
-          await sleep(120);
-          await setRelay(i, false);
-        }
-      }
-      for (let i = 1; i <= 8; i++) await setRelay(i, true);
-      await sleep(700);
-      await allOff();
-      await sleep(500);
-    }
-  </script>
+  }
+
+  document.querySelectorAll("button[data-cmd]").forEach((btn) => {
+    btn.addEventListener("click", () => run(btn.getAttribute("data-cmd")));
+  });
+})();
+</script>
 </body>
 </html>
