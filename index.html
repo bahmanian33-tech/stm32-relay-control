@@ -3,343 +3,155 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>کنترل فن PWM</title>
+<title>کنترل فن — ربات بله</title>
 <style>
   :root {
-    --bg: #0b1410;
-    --card: #15241c;
-    --on: #2e7d32;
-    --off: #c62828;
-    --accent: #ff8f00;
-    --text: #e8f5e9;
-    --muted: #81c784;
-    --line: #1e3a2f;
+    --bg:#0b1410; --card:#15241c; --on:#2e7d32; --off:#c62828;
+    --accent:#ff8f00; --text:#e8f5e9; --muted:#81c784; --line:#1e3a2f;
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: Tahoma, "Segoe UI", sans-serif;
-    background: radial-gradient(ellipse at top, #143024 0%, var(--bg) 55%);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 20px 16px 40px;
-  }
-  .wrap { max-width: 420px; margin: 0 auto; }
-  h1 {
-    text-align: center;
-    font-size: 1.45rem;
-    margin: 0 0 6px;
-    letter-spacing: -0.02em;
-  }
-  .sub {
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.85rem;
-    margin-bottom: 18px;
-  }
-  .status-card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
-    text-align: center;
-  }
-  .pwm {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent);
-  }
-  .bar {
-    height: 12px;
-    background: #0a1a12;
-    border-radius: 99px;
-    overflow: hidden;
-    margin-top: 12px;
-    border: 1px solid var(--line);
-  }
-  .bar > i {
-    display: block;
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #1b5e20, var(--accent));
-    transition: width 0.25s ease;
-  }
-  .row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .row4 {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-  button {
-    border: none;
-    border-radius: 14px;
-    padding: 16px 10px;
-    font-size: 1.05rem;
-    font-family: inherit;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    transition: transform 0.08s ease, filter 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  button:active { transform: scale(0.97); }
-  button:disabled { opacity: 0.5; cursor: wait; }
-  .b-on { background: linear-gradient(180deg, #43a047, var(--on)); }
-  .b-off { background: linear-gradient(180deg, #e53935, var(--off)); }
-  .b-dim { background: #243d30; border: 1px solid var(--line); color: var(--text); font-weight: 600; }
-  .b-accent { background: linear-gradient(180deg, #ffa726, var(--accent)); color: #221100; }
-  details.settings {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 12px 14px;
-    margin-top: 18px;
-  }
-  details.settings summary {
-    cursor: pointer;
-    font-weight: 700;
-    color: var(--muted);
-  }
-  label {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin: 12px 0 4px;
-  }
-  input, select {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--line);
-    background: #0c1a13;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.95rem;
-  }
-  .log {
-    margin-top: 14px;
-    font-size: 0.8rem;
-    color: #9e9e9e;
-    background: #0a120e;
-    border-radius: 12px;
-    padding: 10px 12px;
-    min-height: 44px;
-    word-break: break-all;
-    direction: ltr;
-    text-align: left;
-    font-family: ui-monospace, monospace;
-  }
-  .hint {
-    font-size: 0.78rem;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-top: 10px;
-  }
-  .mode {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .mode button {
-    flex: 1;
-    padding: 10px;
-    font-size: 0.9rem;
-    background: #1a2e24;
-    border: 1px solid var(--line);
-    color: var(--muted);
-  }
-  .mode button.active {
-    border-color: var(--accent);
-    color: #fff;
-    background: #243d30;
-  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Tahoma,"Segoe UI",sans-serif;background:radial-gradient(ellipse at top,#143024 0%,var(--bg) 55%);color:var(--text);min-height:100vh;padding:20px 16px 40px}
+  .wrap{max-width:420px;margin:0 auto}
+  h1{text-align:center;font-size:1.4rem;margin:0 0 4px}
+  .sub{text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:16px}
+  .status-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;text-align:center}
+  .pwm{font-size:2rem;font-weight:700;color:var(--accent)}
+  .bar{height:12px;background:#0a1a12;border-radius:99px;overflow:hidden;margin-top:12px;border:1px solid var(--line)}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#1b5e20,var(--accent));transition:width .25s}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .row4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+  button{border:none;border-radius:14px;padding:16px 10px;font-size:1.05rem;font-family:inherit;font-weight:700;color:#fff;cursor:pointer}
+  button:active{transform:scale(.97)}
+  button:disabled{opacity:.5}
+  .b-on{background:linear-gradient(180deg,#43a047,var(--on))}
+  .b-off{background:linear-gradient(180deg,#e53935,var(--off))}
+  .b-dim{background:#243d30;border:1px solid var(--line);color:var(--text);font-weight:600}
+  .b-accent{background:linear-gradient(180deg,#ffa726,var(--accent));color:#221100}
+  details{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:16px}
+  summary{cursor:pointer;font-weight:700;color:var(--muted)}
+  label{display:block;font-size:.8rem;color:var(--muted);margin:12px 0 4px}
+  input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0c1a13;color:var(--text);font-family:inherit}
+  .log{margin-top:14px;font-size:.8rem;color:#9e9e9e;background:#0a120e;border-radius:12px;padding:10px 12px;min-height:44px;word-break:break-all;direction:ltr;text-align:left;font-family:ui-monospace,monospace}
+  .hint{font-size:.78rem;color:var(--muted);line-height:1.65;margin-top:10px}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>کنترل فن PWM</h1>
-    <p class="sub">همان دکمه‌های ربات بله</p>
+<div class="wrap">
+  <h1>کنترل فن PWM</h1>
+  <p class="sub">ربات بله · اینترنت همراه هم کار می‌کند</p>
 
-    <div class="status-card">
-      <div class="pwm" id="pwmLabel">PWM = 0</div>
-      <div class="bar"><i id="barFill"></i></div>
-    </div>
-
-    <div class="mode">
-      <button type="button" id="modeHttp" class="active">کامپیوتر (HTTP)</button>
-      <button type="button" id="modeBale">ربات بله</button>
-    </div>
-
-    <div class="row">
-      <button type="button" class="b-on" data-cmd="on">روشن</button>
-      <button type="button" class="b-off" data-cmd="off">خاموش</button>
-    </div>
-    <div class="row">
-      <button type="button" class="b-dim" data-cmd="+">+20</button>
-      <button type="button" class="b-dim" data-cmd="-">−20</button>
-    </div>
-    <div class="row4">
-      <button type="button" class="b-dim" data-cmd="50">50</button>
-      <button type="button" class="b-dim" data-cmd="100">100</button>
-      <button type="button" class="b-dim" data-cmd="180">180</button>
-      <button type="button" class="b-dim" data-cmd="255">255</button>
-    </div>
-    <div class="row">
-      <button type="button" class="b-accent" data-cmd="status">وضعیت</button>
-      <button type="button" class="b-dim" data-cmd="cancel">لغو تایمر</button>
-    </div>
-
-    <details class="settings" open>
-      <summary>تنظیمات اتصال</summary>
-
-      <div id="httpSettings">
-        <label>آدرس کامپیوتر (برنامه جاوا)</label>
-        <input id="serverUrl" placeholder="http://192.168.1.10:8765" />
-        <p class="hint">
-          گوشی و کامپیوتر روی یک وای‌فای باشند.
-          برنامه جاوا باید روشن باشد و پیام <b>HTTP server on port 8765</b> را نشان دهد.
-        </p>
-      </div>
-
-      <div id="baleSettings" style="display:none">
-        <label>توکن ربات بله</label>
-        <input id="baleToken" placeholder="123456:ABC..." />
-        <label>Chat ID شما</label>
-        <input id="chatId" placeholder="مثلاً 6284838061" />
-        <p class="hint">
-          اگر آدرس HTTP کامپیوتر را هم پر کرده باشید، فرمان از همان مسیر اجرا می‌شود.
-          در غیر این صورت فقط پیام تأیید در بله می‌آید؛ برای کنترل از راه دور اینترنت همراه، از خود اپ بله استفاده کنید.
-        </p>
-      </div>
-
-      <button type="button" class="b-accent" id="btnSave" style="width:100%;margin-top:12px">ذخیره</button>
-    </details>
-
-    <div class="log" id="log">آماده</div>
+  <div class="status-card">
+    <div class="pwm" id="pwmLabel">PWM = ؟</div>
+    <div class="bar"><i id="barFill"></i></div>
   </div>
 
+  <div class="row">
+    <button class="b-on" data-cmd="on">روشن</button>
+    <button class="b-off" data-cmd="off">خاموش</button>
+  </div>
+  <div class="row">
+    <button class="b-dim" data-cmd="+">+20</button>
+    <button class="b-dim" data-cmd="-">−20</button>
+  </div>
+  <div class="row4">
+    <button class="b-dim" data-cmd="50">50</button>
+    <button class="b-dim" data-cmd="100">100</button>
+    <button class="b-dim" data-cmd="180">180</button>
+    <button class="b-dim" data-cmd="255">255</button>
+  </div>
+  <div class="row">
+    <button class="b-accent" data-cmd="status">وضعیت</button>
+    <button class="b-dim" data-cmd="cancel">لغو تایمر</button>
+  </div>
+
+  <details open>
+    <summary>تنظیمات</summary>
+    <label>توکن ربات بله</label>
+    <input id="token" />
+    <p class="hint">
+      ۱) برنامه جاوا روی کامپیوتر روشن باشد<br/>
+      ۲) دکمه را در این صفحه بزنید<br/>
+      ۳) ظرف ۲ ثانیه فن باید عمل کند<br/>
+      گوشی می‌تواند روی اینترنت همراه باشد.
+    </p>
+    <button class="b-accent" id="btnSave" style="width:100%;margin-top:10px">ذخیره</button>
+  </details>
+
+  <div class="log" id="log">آماده</div>
+</div>
 <script>
-(function () {
-  const $ = (id) => document.getElementById(id);
-  let mode = localStorage.getItem("fan_mode") || "http";
+(function(){
+  const $ = id => document.getElementById(id);
   let pwm = 0;
-
-  $("serverUrl").value = localStorage.getItem("fan_server") || "http://192.168.1.10:8765";
-  $("baleToken").value = localStorage.getItem("fan_token") || "666814160:UBhgGpogVgFUJvLqXMWwNlgCbNNglRznSyg";
-  $("chatId").value = localStorage.getItem("fan_chat") || "";
-
-  function setMode(m) {
-    mode = m;
-    localStorage.setItem("fan_mode", m);
-    $("modeHttp").classList.toggle("active", m === "http");
-    $("modeBale").classList.toggle("active", m === "bale");
-    $("httpSettings").style.display = m === "http" ? "block" : "none";
-    $("baleSettings").style.display = m === "bale" ? "block" : "none";
-  }
-  setMode(mode);
-  $("modeHttp").onclick = () => setMode("http");
-  $("modeBale").onclick = () => setMode("bale");
-
+  $("token").value = localStorage.getItem("fan_token") || "666814160:UBhgGpogVgFUJvLqXMWwNlgCbNNglRznSyg";
   $("btnSave").onclick = () => {
-    localStorage.setItem("fan_server", $("serverUrl").value.trim());
-    localStorage.setItem("fan_token", $("baleToken").value.trim());
-    localStorage.setItem("fan_chat", $("chatId").value.trim());
+    localStorage.setItem("fan_token", $("token").value.trim());
     log("ذخیره شد");
   };
-
-  function setPwm(v) {
-    pwm = Math.max(0, Math.min(255, v | 0));
+  function setPwm(v){
+    pwm = Math.max(0, Math.min(255, v|0));
     $("pwmLabel").textContent = "PWM = " + pwm;
-    $("barFill").style.width = (pwm / 255 * 100).toFixed(1) + "%";
+    $("barFill").style.width = (pwm/255*100).toFixed(1) + "%";
   }
+  function log(m){ $("log").textContent = m; }
 
-  function log(msg) {
-    $("log").textContent = msg;
-  }
-
-  function guessPwmFromCmd(cmd, body) {
-    const m = /PWM\s*=\s*(\d+)/i.exec(body || "");
-    if (m) return setPwm(+m[1]);
-    if (cmd === "on") setPwm(180);
-    else if (cmd === "off") setPwm(0);
-    else if (cmd === "+") setPwm(pwm + 20);
-    else if (cmd === "-") setPwm(pwm - 20);
-    else if (/^\d+$/.test(cmd)) setPwm(+cmd);
-  }
-
-  async function sendHttp(cmd) {
-    let base = $("serverUrl").value.trim().replace(/\/$/, "");
-    if (!base) throw new Error("آدرس کامپیوتر خالی است");
-    const url = base + "/cmd?c=" + encodeURIComponent(cmd);
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 6000);
-    const res = await fetch(url, { signal: ctrl.signal, mode: "cors" });
-    clearTimeout(t);
-    const text = await res.text();
-    if (!res.ok) throw new Error(text || res.status);
-    return text;
-  }
-
-  async function sendBale(cmd) {
-    const token = $("baleToken").value.trim();
-    const chat = $("chatId").value.trim();
-    if (!token || !chat) throw new Error("توکن و Chat ID لازم است");
-
-    const map = {
-      on: "روشن",
-      off: "خاموش",
-      "+": "+20",
-      "-": "-20",
-      status: "وضعیت",
-      cancel: "لغو تایمر"
-    };
-    const text = map[cmd] || cmd;
-
-    const base = $("serverUrl").value.trim();
-    if (base) {
+  function fireUrl(url){
+    return new Promise(function(resolve){
       try {
-        return await sendHttp(cmd);
-      } catch (e) { /* continue */ }
-    }
-
-    const body = new URLSearchParams({
-      chat_id: chat,
-      text: "🌐 وب: " + text
+        fetch(url, { mode: "no-cors", method: "GET", cache: "no-store" }).catch(function(){});
+      } catch(e) {}
+      var ifr = document.createElement("iframe");
+      ifr.style.cssText = "display:none;width:0;height:0;border:0";
+      var done = false;
+      function finish(){
+        if(done) return;
+        done = true;
+        try { ifr.remove(); } catch(e) {}
+        resolve();
+      }
+      ifr.onload = finish;
+      ifr.onerror = finish;
+      setTimeout(finish, 1200);
+      ifr.src = url;
+      document.body.appendChild(ifr);
     });
-    const res = await fetch("https://tapi.bale.ai/bot" + token + "/sendMessage", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
-      body
-    });
-    const json = await res.json();
-    if (!json.ok) throw new Error(JSON.stringify(json));
-    return "پیام به بله: " + text;
   }
 
-  async function run(cmd) {
-    const buttons = document.querySelectorAll("button[data-cmd]");
-    buttons.forEach((b) => (b.disabled = true));
-    log("ارسال " + cmd + " ...");
-    try {
-      const body = mode === "http" ? await sendHttp(cmd) : await sendBale(cmd);
-      log(String(body));
-      guessPwmFromCmd(cmd, String(body));
-    } catch (e) {
-      log("خطا: " + (e.message || e));
-    } finally {
-      buttons.forEach((b) => (b.disabled = false));
-    }
+  async function sendCmd(cmd){
+    var token = $("token").value.trim();
+    if(!token) throw new Error("توکن خالی است");
+    var payload = "FAN|" + cmd + "|" + Date.now();
+    var base = "https://tapi.bale.ai/bot" + token + "/";
+    var u1 = base + "setMyShortDescription?short_description=" + encodeURIComponent(payload);
+    await fireUrl(u1);
+    var u2 = base + "setMyDescription?description=" + encodeURIComponent(payload);
+    await fireUrl(u2);
+    return "فرمان «" + cmd + "» به ربات ارسال شد";
   }
 
-  document.querySelectorAll("button[data-cmd]").forEach((btn) => {
-    btn.addEventListener("click", () => run(btn.getAttribute("data-cmd")));
+  function guess(cmd){
+    if(cmd==="on") setPwm(180);
+    else if(cmd==="off") setPwm(0);
+    else if(cmd==="+") setPwm(pwm+20);
+    else if(cmd==="-") setPwm(pwm-20);
+    else if(/^\d+$/.test(cmd)) setPwm(+cmd);
+  }
+
+  document.querySelectorAll("button[data-cmd]").forEach(function(btn){
+    btn.addEventListener("click", async function(){
+      var cmd = btn.getAttribute("data-cmd");
+      document.querySelectorAll("button[data-cmd]").forEach(function(b){ b.disabled = true; });
+      log("ارسال " + cmd + " ...");
+      try {
+        var r = await sendCmd(cmd);
+        log(r + " — منتظر اجرای کامپیوتر (حدود ۲ ثانیه)");
+        guess(cmd);
+      } catch(e) {
+        log("خطا: " + (e.message || e));
+      } finally {
+        document.querySelectorAll("button[data-cmd]").forEach(function(b){ b.disabled = false; });
+      }
+    });
   });
 })();
 </script>
