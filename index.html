@@ -88,7 +88,6 @@
     font-size: 1.4rem;
     font-weight: 700;
     color: var(--fan);
-    text-align: center;
   }
   input[type=range].vert {
     -webkit-appearance: none;
@@ -128,11 +127,11 @@
   }
   .fan-btns {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
     margin-top: 12px;
   }
-  .fan-btns.two { grid-template-columns: 1fr 1fr; }
+  .fan-btns.four { grid-template-columns: repeat(4, 1fr); }
   button {
     border: none;
     border-radius: 14px;
@@ -203,7 +202,7 @@
 <body>
 <div class="wrap">
   <h1>کنترل فن و رله‌ها</h1>
-  <p class="sub">ولوم · اعمال بعد از رها کردن انگشت</p>
+  <p class="sub">ولوم بعد از رها کردن انگشت اعمال می‌شود</p>
 
   <div class="panel">
     <h2>سرعت فن (PWM)</h2>
@@ -218,11 +217,11 @@
         <div style="font-size:0.72rem;color:var(--muted)">بالا = تندتر</div>
       </div>
     </div>
-    <div class="fan-btns two">
+    <div class="fan-btns">
       <button class="b-on" type="button" data-cmd="s180">روشن</button>
       <button class="b-off" type="button" data-cmd="s0">خاموش</button>
     </div>
-    <div class="fan-btns" style="margin-top:8px;grid-template-columns:repeat(4,1fr)">
+    <div class="fan-btns four" style="margin-top:8px">
       <button class="b-dim" type="button" data-cmd="s50">50</button>
       <button class="b-dim" type="button" data-cmd="s100">100</button>
       <button class="b-dim" type="button" data-cmd="s180">180</button>
@@ -233,7 +232,7 @@
   <div class="panel">
     <h2>هشت رله</h2>
     <div class="relay-grid" id="relays"></div>
-    <div class="fan-btns two" style="margin-top:12px">
+    <div class="fan-btns" style="margin-top:12px">
       <button class="b-off" type="button" data-cmd="alloff" style="grid-column:1/-1">خاموش کردن همه رله‌ها</button>
     </div>
   </div>
@@ -243,7 +242,7 @@
     <label>مثال: http://192.168.1.10:8765</label>
     <input id="server" placeholder="http://192.168.1.10:8765" />
     <button class="b-dim" type="button" id="save" style="width:100%;margin-top:10px">ذخیره</button>
-    <p class="hint">برنامه جاوا روی کامپیوتر روشن باشد. از ربات بله هم می‌توانید کنترل کنید.</p>
+    <p class="hint">برنامه جاوا روی کامپیوتر روشن باشد. گوشی و PC روی یک وای‌فای باشند. از ربات بله هم می‌توانید کنترل کنید.</p>
     <div class="log" id="log">آماده</div>
   </div>
 </div>
@@ -309,11 +308,11 @@
   function parseStatus(text) {
     const m = /PWM\s*=\s*(\d+)/i.exec(text);
     if (m) pwm = +m[1];
-    if (/Relays:/i.test(text)) {
-      for (let i = 1; i <= 8; i++) {
-        if (text.indexOf(i + "\u25CF") >= 0) relays[i - 1] = true;
-        else if (text.indexOf(i + "\u25CB") >= 0) relays[i - 1] = false;
-      }
+    for (let i = 1; i <= 8; i++) {
+      const reOn = new RegExp("R" + i + "\\s*=\\s*ON", "i");
+      const reOff = new RegExp("R" + i + "\\s*=\\s*off", "i");
+      if (reOn.test(text)) relays[i - 1] = true;
+      else if (reOff.test(text)) relays[i - 1] = false;
     }
     ui();
   }
