@@ -6,195 +6,94 @@
 <title>خانه هوشمند · فن و رله</title>
 <style>
   :root {
-    --bg: #0a0e17;
-    --card: #121a2b;
-    --line: #1e2a42;
-    --text: #e8eefc;
-    --muted: #8b9bb8;
-    --on: #00c853;
-    --off: #37474f;
-    --fan: #ff9100;
+    --bg: #0a0e17; --card: #121a2b; --line: #1e2a42; --text: #e8eefc;
+    --muted: #8b9bb8; --on: #00c853; --off: #37474f; --fan: #ff9100; --bale: #00a884;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
-    margin: 0;
-    font-family: Tahoma, "Segoe UI", sans-serif;
+    margin: 0; font-family: Tahoma, "Segoe UI", sans-serif;
     background: radial-gradient(1200px 600px at 50% -10%, #1a2744 0%, var(--bg) 55%);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 16px;
+    color: var(--text); min-height: 100vh; padding: 16px;
   }
   .wrap { max-width: 440px; margin: 0 auto; }
   h1 { margin: 0; font-size: 1.25rem; text-align: center; }
-  .sub { text-align: center; color: var(--muted); font-size: 0.8rem; margin: 6px 0 16px; }
+  .sub { text-align: center; color: var(--muted); font-size: 0.8rem; margin: 6px 0 14px; }
   .panel {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 16px;
-    margin-bottom: 14px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 20px; padding: 16px; margin-bottom: 14px;
   }
-  .panel h2 {
-    margin: 0 0 12px;
-    font-size: 0.95rem;
-    color: var(--muted);
-    font-weight: 600;
+  .panel h2 { margin: 0 0 12px; font-size: 0.95rem; color: var(--muted); font-weight: 600; }
+  .banner {
+    background: #0d2a22; border: 1px solid #1a5c4a; border-radius: 14px;
+    padding: 12px; font-size: 0.82rem; line-height: 1.6; margin-bottom: 14px; color: #b6f5d8;
   }
-  .fan-box {
-    display: flex;
-    gap: 18px;
-    align-items: center;
-    justify-content: center;
-  }
+  .fan-box { display: flex; gap: 18px; align-items: center; justify-content: center; }
   .fan-visual {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    background: #0d1524;
-    border: 2px solid var(--line);
-    display: grid;
-    place-items: center;
-    position: relative;
+    width: 110px; height: 110px; border-radius: 50%; background: #0d1524;
+    border: 2px solid var(--line); display: grid; place-items: center; position: relative;
   }
   .fan-blade {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background:
-      conic-gradient(from 0deg, var(--fan) 0 40deg, transparent 40deg 90deg,
-        var(--fan) 90deg 130deg, transparent 130deg 180deg,
-        var(--fan) 180deg 220deg, transparent 220deg 270deg,
-        var(--fan) 270deg 310deg, transparent 310deg 360deg);
-    animation: spin 2s linear infinite;
-    animation-play-state: paused;
-    opacity: 0.85;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--fan) 0 40deg, transparent 40deg 90deg,
+      var(--fan) 90deg 130deg, transparent 130deg 180deg, var(--fan) 180deg 220deg,
+      transparent 220deg 270deg, var(--fan) 270deg 310deg, transparent 310deg 360deg);
+    animation: spin 2s linear infinite; animation-play-state: paused; opacity: 0.85;
   }
   .fan-blade.on { animation-play-state: running; }
   .fan-hub {
-    position: absolute;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 0 12px var(--fan);
+    position: absolute; width: 20px; height: 20px; border-radius: 50%;
+    background: #fff; box-shadow: 0 0 12px var(--fan);
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .slider-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 160px;
-  }
-  .pwm-num {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--fan);
-  }
+  .slider-col { display: flex; flex-direction: column; align-items: center; height: 160px; }
+  .pwm-num { font-size: 1.4rem; font-weight: 700; color: var(--fan); }
   input[type=range].vert {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 140px;
-    height: 28px;
-    transform: rotate(-90deg);
-    transform-origin: center;
-    background: transparent;
-    margin: 56px 0;
-    cursor: pointer;
+    -webkit-appearance: none; appearance: none; width: 140px; height: 28px;
+    transform: rotate(-90deg); transform-origin: center; background: transparent;
+    margin: 56px 0; cursor: pointer;
   }
   input[type=range].vert::-webkit-slider-runnable-track {
-    height: 10px;
-    border-radius: 99px;
-    background: linear-gradient(90deg, #263238, var(--fan));
+    height: 10px; border-radius: 99px; background: linear-gradient(90deg, #263238, var(--fan));
   }
   input[type=range].vert::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    background: #fff;
-    border: 3px solid var(--fan);
-    margin-top: -8px;
+    -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--fan); margin-top: -8px;
     box-shadow: 0 2px 10px rgba(0,0,0,.4);
   }
-  input[type=range].vert::-moz-range-track {
-    height: 10px;
-    border-radius: 99px;
-    background: linear-gradient(90deg, #263238, var(--fan));
-  }
-  input[type=range].vert::-moz-range-thumb {
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    background: #fff;
-    border: 3px solid var(--fan);
-  }
-  .fan-btns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  .fan-btns.four { grid-template-columns: repeat(4, 1fr); }
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .btns.four { grid-template-columns: repeat(4, 1fr); }
   button {
-    border: none;
-    border-radius: 14px;
-    padding: 12px 8px;
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: #fff;
-    cursor: pointer;
+    border: none; border-radius: 14px; padding: 12px 8px; font-family: inherit;
+    font-weight: 700; font-size: 0.95rem; color: #fff; cursor: pointer;
   }
   button:active { transform: scale(0.97); }
   .b-on { background: linear-gradient(180deg, #00e676, var(--on)); color: #003310; }
   .b-off { background: #455a64; }
   .b-dim { background: #1a2438; border: 1px solid var(--line); color: var(--text); }
-  .relay-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
+  .b-bale { background: linear-gradient(180deg, #00c9a0, var(--bale)); color: #003328; width: 100%; }
+  .relay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .relay {
-    border-radius: 16px;
-    padding: 14px 12px;
-    background: #0d1524;
-    border: 1px solid var(--line);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    user-select: none;
+    border-radius: 16px; padding: 14px 12px; background: #0d1524; border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;
   }
   .relay .name { font-weight: 700; }
   .relay .dot {
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    background: var(--off);
+    width: 14px; height: 14px; border-radius: 50%; background: var(--off);
     box-shadow: inset 0 0 0 2px #546e7a;
   }
   .relay.active {
     border-color: rgba(0,200,83,.5);
     background: linear-gradient(135deg, #0d1f14, #0d1524);
   }
-  .relay.active .dot {
-    background: var(--on);
-    box-shadow: 0 0 12px var(--on);
-  }
-  .settings label { display: block; font-size: 0.78rem; color: var(--muted); margin: 8px 0 4px; }
-  .settings input {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid var(--line);
-    background: #0d1524;
-    color: var(--text);
-    font-family: inherit;
+  .relay.active .dot { background: var(--on); box-shadow: 0 0 12px var(--on); }
+  label { display: block; font-size: 0.78rem; color: var(--muted); margin: 8px 0 4px; }
+  input[type=text] {
+    width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line);
+    background: #0d1524; color: var(--text); font-family: inherit;
   }
   .log {
-    margin-top: 10px;
-    font-size: 0.75rem;
-    color: var(--muted);
-    font-family: ui-monospace, monospace;
-    direction: ltr;
-    text-align: left;
-    min-height: 1.2em;
+    margin-top: 10px; font-size: 0.75rem; color: var(--muted);
+    font-family: ui-monospace, monospace; direction: ltr; text-align: left; min-height: 1.2em;
   }
   .hint { font-size: 0.75rem; color: var(--muted); line-height: 1.55; margin-top: 8px; }
 </style>
@@ -202,10 +101,21 @@
 <body>
 <div class="wrap">
   <h1>کنترل فن و رله‌ها</h1>
-  <p class="sub">ولوم بعد از رها کردن انگشت اعمال می‌شود</p>
+  <p class="sub">همان رابط گرافیکی · همراه با ربات بله</p>
+
+  <div class="banner">
+    <b>از همراه اول:</b> دکمه «باز کردن ربات بله» را بزنید و از کیبورد ربات فرمان دهید.
+    برنامه جاوا روی کامپیوتر باید روشن باشد.<br/><br/>
+    <b>در خانه (یک وای‌فای با PC):</b> آدرس کامپیوتر را پایین وارد کنید؛ دکمه‌های همین صفحه مستقیم کار می‌کنند.
+  </div>
 
   <div class="panel">
-    <h2>سرعت فن (PWM)</h2>
+    <button class="b-bale" type="button" id="openBale">باز کردن ربات بله</button>
+    <p class="hint">بعد از باز شدن بله، /start بزنید و از دکمه‌های رله و فن استفاده کنید.</p>
+  </div>
+
+  <div class="panel">
+    <h2>سرعت فن (PWM) — فقط شبکه خانگی</h2>
     <div class="fan-box">
       <div class="fan-visual">
         <div class="fan-blade" id="blade"></div>
@@ -214,14 +124,14 @@
       <div class="slider-col">
         <div class="pwm-num" id="pwmLabel">0</div>
         <input class="vert" id="slider" type="range" min="0" max="255" value="0" />
-        <div style="font-size:0.72rem;color:var(--muted)">بالا = تندتر</div>
+        <div style="font-size:0.72rem;color:var(--muted)">اعمال بعد از رها کردن</div>
       </div>
     </div>
-    <div class="fan-btns">
+    <div class="btns">
       <button class="b-on" type="button" data-cmd="s180">روشن</button>
       <button class="b-off" type="button" data-cmd="s0">خاموش</button>
     </div>
-    <div class="fan-btns four" style="margin-top:8px">
+    <div class="btns four" style="margin-top:8px">
       <button class="b-dim" type="button" data-cmd="s50">50</button>
       <button class="b-dim" type="button" data-cmd="s100">100</button>
       <button class="b-dim" type="button" data-cmd="s180">180</button>
@@ -230,19 +140,18 @@
   </div>
 
   <div class="panel">
-    <h2>هشت رله</h2>
+    <h2>هشت رله — فقط شبکه خانگی</h2>
     <div class="relay-grid" id="relays"></div>
-    <div class="fan-btns" style="margin-top:12px">
+    <div class="btns" style="margin-top:12px">
       <button class="b-off" type="button" data-cmd="alloff" style="grid-column:1/-1">خاموش کردن همه رله‌ها</button>
     </div>
   </div>
 
-  <div class="panel settings">
-    <h2>آدرس کامپیوتر</h2>
+  <div class="panel">
+    <h2>آدرس کامپیوتر (وای‌فای خانه)</h2>
     <label>مثال: http://192.168.1.10:8765</label>
-    <input id="server" placeholder="http://192.168.1.10:8765" />
+    <input type="text" id="server" placeholder="http://192.168.1.10:8765" />
     <button class="b-dim" type="button" id="save" style="width:100%;margin-top:10px">ذخیره</button>
-    <p class="hint">برنامه جاوا روی کامپیوتر روشن باشد. گوشی و PC روی یک وای‌فای باشند. از ربات بله هم می‌توانید کنترل کنید.</p>
     <div class="log" id="log">آماده</div>
   </div>
 </div>
@@ -258,13 +167,21 @@
     log("ذخیره شد");
   };
 
+  $("openBale").onclick = () => {
+    window.location.href = "bale://";
+    setTimeout(() => { window.open("https://web.bale.ai/", "_blank"); }, 400);
+  };
+
   const grid = $("relays");
   for (let i = 1; i <= 8; i++) {
     const el = document.createElement("div");
     el.className = "relay";
     el.dataset.n = i;
     el.innerHTML = '<span class="name">رله ' + i + '</span><span class="dot"></span>';
-    el.onclick = () => toggleRelay(i);
+    el.onclick = () => send("t" + i).then(() => {
+      relays[i - 1] = !relays[i - 1];
+      ui();
+    }).catch(() => {});
     grid.appendChild(el);
   }
 
@@ -275,15 +192,11 @@
     if (pwm > 0) {
       blade.classList.add("on");
       blade.style.animationDuration = (2.5 - (pwm / 255) * 2.2).toFixed(2) + "s";
-    } else {
-      blade.classList.remove("on");
-    }
+    } else blade.classList.remove("on");
     grid.querySelectorAll(".relay").forEach((el) => {
-      const n = +el.dataset.n;
-      el.classList.toggle("active", !!relays[n - 1]);
+      el.classList.toggle("active", !!relays[+el.dataset.n - 1]);
     });
   }
-
   function log(m) { $("log").textContent = m; }
   function base() { return $("server").value.trim().replace(/\/$/, ""); }
 
@@ -296,45 +209,28 @@
       clearTimeout(t);
       const text = await res.text();
       log(text.replace(/\n/g, " | "));
-      parseStatus(text);
+      const m = /PWM\s*=\s*(\d+)/i.exec(text);
+      if (m) pwm = +m[1];
+      for (let i = 1; i <= 8; i++) {
+        if (new RegExp("R" + i + "\\s*=\\s*ON", "i").test(text)) relays[i - 1] = true;
+        else if (new RegExp("R" + i + "\\s*=\\s*off", "i").test(text)) relays[i - 1] = false;
+      }
+      ui();
       return text;
     } catch (e) {
       clearTimeout(t);
-      log("خطا: " + (e.message || e));
+      log("خطا: " + (e.message || e) + " — اگر همراه اول هستید از ربات بله استفاده کنید");
       throw e;
     }
   }
 
-  function parseStatus(text) {
-    const m = /PWM\s*=\s*(\d+)/i.exec(text);
-    if (m) pwm = +m[1];
-    for (let i = 1; i <= 8; i++) {
-      const reOn = new RegExp("R" + i + "\\s*=\\s*ON", "i");
-      const reOff = new RegExp("R" + i + "\\s*=\\s*off", "i");
-      if (reOn.test(text)) relays[i - 1] = true;
-      else if (reOff.test(text)) relays[i - 1] = false;
-    }
-    ui();
-  }
-
   const slider = $("slider");
-  slider.addEventListener("input", () => {
-    $("pwmLabel").textContent = slider.value;
-  });
+  slider.addEventListener("input", () => { $("pwmLabel").textContent = slider.value; });
   slider.addEventListener("change", async () => {
-    const v = +slider.value;
-    pwm = v;
+    pwm = +slider.value;
     ui();
-    try { await send("s" + v); } catch (e) {}
+    try { await send("s" + pwm); } catch (e) {}
   });
-
-  async function toggleRelay(n) {
-    try {
-      await send("t" + n);
-      relays[n - 1] = !relays[n - 1];
-      ui();
-    } catch (e) {}
-  }
 
   document.querySelectorAll("[data-cmd]").forEach((btn) => {
     btn.addEventListener("click", async () => {
