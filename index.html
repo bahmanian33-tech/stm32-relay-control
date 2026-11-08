@@ -29,6 +29,7 @@ input[type=range].vert::-webkit-slider-thumb{-webkit-appearance:none;width:26px;
 .btns.four{grid-template-columns:repeat(4,1fr)}
 button{border:none;border-radius:14px;padding:12px 8px;font-family:inherit;font-weight:700;font-size:.95rem;color:#fff;cursor:pointer}
 button:active{transform:scale(.97)}
+button:disabled{opacity:.5}
 .b-on{background:linear-gradient(180deg,#00e676,var(--on));color:#003310}
 .b-off{background:#455a64}
 .b-dim{background:#1a2438;border:1px solid var(--line);color:var(--text)}
@@ -46,17 +47,20 @@ input[type=text]{width:100%;padding:10px 12px;border-radius:12px;border:1px soli
 <body>
 <div class="wrap">
   <h1>کنترل فن و رله</h1>
-  <p class="sub">cloudflared · بدون VPN روی گوشی</p>
-  <div class="banner">آدرس تونل cloudflared را از پنجره CMD کپی کنید (شبیه https://xxxx.trycloudflare.com) و پایین ذخیره کنید.</div>
+  <p class="sub">cloudflared · همراه اول</p>
+  <div class="banner">آدرس تونل را از پنجره cloudflared کپی کنید و ذخیره کنید. هر دو پنجره Java و Tunnel باید باز باشند.</div>
+
   <div class="panel">
     <h2>آدرس تونل</h2>
-    <label>مثال: https://abc-def.trycloudflare.com</label>
+    <label>بدون اسلش آخر — مثال: https://xxxx.trycloudflare.com</label>
     <input type="text" id="server" placeholder="https://....trycloudflare.com" />
     <div class="btns" style="margin-top:10px">
-      <button class="b-dim" type="button" id="save" style="grid-column:1/-1">ذخیره آدرس</button>
+      <button class="b-dim" type="button" id="save">ذخیره</button>
+      <button class="b-dim" type="button" id="ping">تست اتصال</button>
     </div>
     <div class="log" id="log">آماده</div>
   </div>
+
   <div class="panel">
     <h2>سرعت فن</h2>
     <div class="fan-box">
@@ -77,6 +81,7 @@ input[type=text]{width:100%;padding:10px 12px;border-radius:12px;border:1px soli
       <button class="b-dim" type="button" data-cmd="s255">255</button>
     </div>
   </div>
+
   <div class="panel">
     <h2>هشت رله</h2>
     <div class="relay-grid" id="relays"></div>
@@ -87,13 +92,17 @@ input[type=text]{width:100%;padding:10px 12px;border-radius:12px;border:1px soli
 </div>
 <script>
 (function(){
-  var pwm=0,relays=[false,false,false,false,false,false,false,false];
+  var pwm=0,relays=[false,false,false,false,false,false,false,false],busy=false;
   var serverEl=document.getElementById("server");
   serverEl.value=localStorage.getItem("cf_url")||"";
   document.getElementById("save").onclick=function(){
-    localStorage.setItem("cf_url",serverEl.value.trim().replace(/\/$/,""));
-    log("ذخیره شد");
+    var u=serverEl.value.trim().replace(/\/$/,"");
+    serverEl.value=u;
+    localStorage.setItem("cf_url",u);
+    log("ذخیره شد: "+u);
   };
+  document.getElementById("ping").onclick=function(){send("?");};
+
   var grid=document.getElementById("relays");
   for(var i=1;i<=8;i++){
     var el=document.createElement("div");
@@ -112,18 +121,31 @@ input[type=text]{width:100%;padding:10px 12px;border-radius:12px;border:1px soli
     var nodes=grid.querySelectorAll(".relay");
     for(var j=0;j<nodes.length;j++)nodes[j].classList.toggle("active",!!relays[+nodes[j].dataset.n-1]);
   }
-  function base(){return (serverEl.value||localStorage.getItem("cf_url")||"").trim().replace(/\/$/,"");}
+  function base(){
+    return (serverEl.value||localStorage.getItem("cf_url")||"").trim().replace(/\/$/,"");
+  }
   function send(cmd){
     var b=base();
-    if(!b){log("اول آدرس تونل را ذخیره کنید");alert("آدرس cloudflared را وارد و ذخیره کنید");return;}
+    if(!b){log("اول آدرس تونل را ذخیره کنید");return;}
+    if(busy){log("صبر کنید...");return;}
+    busy=true;
     log("ارسال "+cmd+" ...");
     var url=b+"/cmd?c="+encodeURIComponent(cmd);
     var ctrl=new AbortController();
-    var t=setTimeout(function(){ctrl.abort();},8000);
-    fetch(url,{signal:ctrl.signal,mode:"cors"})
-      .then(function(r){return r.text();})
+    var t=setTimeout(function(){ctrl.abort();},30000);
+    fetch(url,{
+      method:"GET",
+      signal:ctrl.signal,
+      mode:"cors",
+      cache:"no-store"
+    })
+      .then(function(r){
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        return r.text();
+      })
       .then(function(text){
         clearTimeout(t);
+        busy=false;
         log(text.replace(/\n/g," | "));
         var m=text.match(/PWM\s*=\s*(\d+)/i);
         if(m)pwm=+m[1];
@@ -133,7 +155,15 @@ input[type=text]{width:100%;padding:10px 12px;border-radius:12px;border:1px soli
         }
         ui();
       })
-      .catch(function(e){clearTimeout(t);log("خطا: "+e);});
+      .catch(function(e){
+        clearTimeout(t);
+        busy=false;
+        var msg=String(e&&e.message?e.message:e);
+        if(msg.indexOf("abort")>=0||msg.indexOf("Abort")>=0)
+          log("قطع شد (کند/تونل). Java و Tunnel باز باشند.\nدوباره بزنید یا در مرورگر تست کنید:\n"+url);
+        else
+          log("خطا: "+msg);
+      });
   }
   document.getElementById("slider").addEventListener("input",function(){document.getElementById("pwmLabel").textContent=this.value;});
   document.getElementById("slider").addEventListener("change",function(){pwm=+this.value;ui();send("s"+pwm);});
